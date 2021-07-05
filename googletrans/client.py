@@ -58,9 +58,10 @@ class Translator:
                  timeout: Timeout = None,
                  http2=True):
 
-        self.client = httpx.Client(http2=http2)
-        if proxies is not None:  # pragma: nocover
-            self.client.proxies = proxies
+        if proxies:
+            self.client = httpx.Client(http2=http2, proxies=proxies)
+        else:
+            self.client = httpx.Client(http2=http2)
 
         self.client.headers.update({
             'User-Agent': user_agent,
@@ -105,7 +106,9 @@ class Translator:
                                     token=token, override=override)
 
         url = urls.TRANSLATE.format(host=self._pick_service_url())
-        r = self.client.get(url, params=params)
+        # response = self.client.get('https://ifconfig.me/ip')
+        # print('httpx', response.text)
+        r = self.client.get(url, params=params, timeout=None)
 
         if r.status_code == 200:
             data = utils.format_json(r.text)
